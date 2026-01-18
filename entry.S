@@ -37,15 +37,16 @@ multiboot_header:
 # By convention, the _start symbol specifies the ELF entry point.
 # Since we haven't set up virtual memory yet, our entry point is
 # the physical address of 'entry'.
+#内核入口点：从bootloader跳转到此处，初始化内核态环境
 .globl _start
 _start = V2P_WO(entry)
 
 # Entering xv6 on boot processor, with paging off.
 .globl entry
-entry:
+entry:#初始化内核段寄存器：设置为内核数据段（SEL_KD=0x10）
   # Turn on page size extension for 4Mbyte pages
-  movl    %cr4, %eax
-  orl     $(CR4_PSE), %eax
+  movl    %cr4, %eax ## eax = 内核数据段选择子
+  orl     $(CR4_PSE), %eax  
   movl    %eax, %cr4
   # Set page directory
   movl    $(V2P_WO(entrypgdir)), %eax

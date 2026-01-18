@@ -13,10 +13,10 @@ start:
   cli                         # BIOS enabled interrupts; disable
 
   # Zero data segment registers DS, ES, and SS.
-  xorw    %ax,%ax             # Set %ax to zero
-  movw    %ax,%ds             # -> Data Segment
-  movw    %ax,%es             # -> Extra Segment
-  movw    %ax,%ss             # -> Stack Segment
+  xorw    %ax,%ax             # Set %ax to zero ax寄存器清零
+  movw    %ax,%ds             # -> Data Segment数据段寄存器ds=0
+  movw    %ax,%es             # -> Extra Segment 附加段寄存器es=0
+  movw    %ax,%ss             # -> Stack Segment 栈段寄存器ss=0
 
   # Physical address line A20 is tied to zero so that the first PCs 
   # with 2 MB would run software that assumed 1 MB.  Undo that.

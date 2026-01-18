@@ -17,26 +17,28 @@ void readseg(uchar*, uint, uint);
 void
 bootmain(void)
 {
-  struct elfhdr *elf;
-  struct proghdr *ph, *eph;
-  void (*entry)(void);
-  uchar* pa;
-
+  struct elfhdr *elf; //ELF文件头指针
+  struct proghdr *ph, *eph;//ELF程序段头指针（ph:当前段，eph:尾段）
+  void (*entry)(void);//内核入口函数指针
+  uchar* pa;//物理内存地址指针
+//定位内核ELF镜像：将内核加载到物理内存0x10000地址（1MB处）
   elf = (struct elfhdr*)0x10000;  // scratch space
 
-  // Read 1st page off disk
+  // 从磁盘读取ELF头部：读取前4096字节（覆盖ELF头和程序段头）
   readseg((uchar*)elf, 4096, 0);
 
   // Is this an ELF executable?
   if(elf->magic != ELF_MAGIC)
-    return;  // let bootasm.S handle error
+    return;  // let bootasm.S handle error魔数错误，启动失败
 
-  // Load each program segment (ignores ph flags).
+  // Load each program segment (ignores ph flags).遍历所有ELF程序段，将内核加载到指定物理内存地址
   ph = (struct proghdr*)((uchar*)elf + elf->phoff);
   eph = ph + elf->phnum;
   for(; ph < eph; ph++){
     pa = (uchar*)ph->paddr;
+    //读取段的文件内容到物理内存
     readseg(pa, ph->filesz, ph->off);
+    // 若段的内存大小 > 文件大小，填充剩余空间为0
     if(ph->memsz > ph->filesz)
       stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
   }

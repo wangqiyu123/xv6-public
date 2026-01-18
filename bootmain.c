@@ -9,6 +9,8 @@
 #include "elf.h"
 #include "x86.h"
 #include "memlayout.h"
+//新增：引入cprintf所需的头文件
+#include "defs.h"
 
 #define SECTSIZE  512
 
@@ -21,11 +23,16 @@ bootmain(void)
   struct proghdr *ph, *eph;//ELF程序段头指针（ph:当前段，eph:尾段）
   void (*entry)(void);//内核入口函数指针
   uchar* pa;//物理内存地址指针
+//新增：打印进入bootmain
+  cprintf("[BOOT] enter bootmain\n");
+
 //定位内核ELF镜像：将内核加载到物理内存0x10000地址（1MB处）
   elf = (struct elfhdr*)0x10000;  // scratch space
 
   // 从磁盘读取ELF头部：读取前4096字节（覆盖ELF头和程序段头）
   readseg((uchar*)elf, 4096, 0);
+//新增：打印ELF头部加载完成
+  cprintf("[BOOT] elf header loaded\n");
 
   // Is this an ELF executable?
   if(elf->magic != ELF_MAGIC)
@@ -45,6 +52,8 @@ bootmain(void)
 
   // Call the entry point from the ELF header.
   // Does not return!
+  // 新增：打印内核加载完成
+  cprintf("[BOOT] kernel loaded\n");
   entry = (void(*)(void))(elf->entry);
   entry();
 }

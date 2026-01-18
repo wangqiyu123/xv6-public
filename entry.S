@@ -21,6 +21,8 @@
 #include "asm.h"
 #include "memlayout.h"
 #include "mmu.h"
+//新增：引入cprintf的声明
+.extern cprintf
 #include "param.h"
 
 # Multiboot header.  Data to direct multiboot loader.
@@ -44,6 +46,12 @@ _start = V2P_WO(entry)
 # Entering xv6 on boot processor, with paging off.
 .globl entry
 entry:#初始化内核段寄存器：设置为内核数据段（SEL_KD=0x10）
+
+//新增：打印内核入口标记
+  push1 &msg_entry #将字符串地址压栈
+  call cprintf #调用cprintf函数
+  add $4,%esp #清理栈
+
   # Turn on page size extension for 4Mbyte pages
   movl    %cr4, %eax ## eax = 内核数据段选择子
   orl     $(CR4_PSE), %eax  
@@ -65,5 +73,7 @@ entry:#初始化内核段寄存器：设置为内核数据段（SEL_KD=0x10）
   # for a direct jump.
   mov $main, %eax
   jmp *%eax
-
+//新增：定义打印的字符串
+msg_entry:
+  .asciz "[BOOT] enter lernel entry\n"
 .comm stack, KSTACKSIZE
